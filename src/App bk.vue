@@ -17,7 +17,7 @@ const board = ref<Board>([
   { row: 2, col: 2, symbol: "" },
 ]);
 
-const winSquares = ref<Square[]>([]);
+const winSquares = ref<Array<Square>>([]);
 
 const playerOne: Player = {
   name: "Player One",
@@ -36,28 +36,16 @@ const winner = ref<Player | null>(null);
 const endGame = ref(true);
 
 const displayStatus = computed(() => {
-  //1 Winner
   if (winner.value) {
-    return `Winner: ${winner.value?.name} (${winner.value?.symbol})!!!`;
-  }
-
-  //tie game
-  let filledSquare = board.value.filter(
-    (square) => square.symbol !== ""
-  ).length;
-  if (endGame.value && filledSquare === 9) {
+    return `Winner: ${winner.value.name} (${winner.value.symbol})!!!`;
+  } else if (endGame.value) {
     return `It's a tie!`;
-  }
-
-  //bot move
-  if (currentPlayer.value.isBot) {
+  } else if (currentPlayer.value.isBot) {
     return `${currentPlayer.value.name} (${currentPlayer.value.symbol}) is thinking...`;
+  } else {
+    return `Turn: ${currentPlayer.value.name} (${currentPlayer.value.symbol})`;
   }
-
-  //2 players game
-  return `Turn: ${currentPlayer.value.name} (${currentPlayer.value.symbol})`;
 });
-
 const reset = () => {
   board.value.forEach((square) => {
     square.symbol = "";
@@ -127,56 +115,61 @@ const turn = (square: Square, player: Player) => {
 };
 
 const getWinSquares = () => {
-  const winningSquares: Square[] = [];
+  const winSquares: Array<Square> = [];
+  
 
   // Check rows
   for (let row = 0; row < 3; row++) {
-    const currentSymbol = board.value[row * 3].symbol;
-    const rowSquares = board.value.slice(row * 3, row * 3 + 3);
+    const currentSymbol = board.value[row].symbol;
+    const rowSquares = board.value.filter((square) => square.row === row);
     if (
       rowSquares.every(
         (square) => square.symbol === currentSymbol && currentSymbol !== ""
       )
     ) {
-      winningSquares.push(...rowSquares);
+      winSquares.push(...rowSquares);
     }
   }
 
   // Check columns
   for (let col = 0; col < 3; col++) {
     const currentSymbol = board.value[col].symbol;
-    const colSquares = [0, 1, 2].map((row) => board.value[row * 3 + col]);
+    const colSquares = board.value.filter((square) => square.col === col);
     if (
       colSquares.every(
         (square) => square.symbol === currentSymbol && currentSymbol !== ""
       )
     ) {
-      winningSquares.push(...colSquares);
+      winSquares.push(...colSquares);
     }
   }
 
   // Check diagonals
-  const diagonalSquares = [0, 4, 8].map((index) => board.value[index]);
+  const diagonalSquares = board.value.filter(
+    (square) => square.row === square.col
+  );
   const diagSymbol = diagonalSquares[0].symbol;
   if (
     diagonalSquares.every(
       (square) => square.symbol === diagSymbol && diagSymbol !== ""
     )
   ) {
-    winningSquares.push(...diagonalSquares);
+    winSquares.push(...diagonalSquares);
   }
 
   const antiDiagSymbol = board.value[2].symbol;
-  const antiDiagonalSquares = [2, 4, 6].map((index) => board.value[index]);
+  const antiDiagonalSquares = board.value.filter(
+    (square) => square.row + square.col === 2
+  );
   if (
     antiDiagonalSquares.every(
       (square) => square.symbol === antiDiagSymbol && antiDiagSymbol !== ""
     )
   ) {
-    winningSquares.push(...antiDiagonalSquares);
+    winSquares.push(...antiDiagonalSquares);
   }
 
-  return winningSquares;
+  return winSquares;
 };
 
 const dialog = ref<HTMLDialogElement>();
@@ -205,6 +198,9 @@ const startTwoPlayerGame = () => {
 
 <template>
   <main class="flex items-center justify-center m-12">
+    <div class="mx-auto">
+        player
+    </div>
     <div class="mx-auto">
       <h1 class="text-4xl">Tic-Tac-Toe</h1>
       <hr class="my-4" />
@@ -245,6 +241,9 @@ const startTwoPlayerGame = () => {
           />
         </div>
       </div>
+    </div>
+    <div class="mx-auto">
+        game State
     </div>
   </main>
 </template>
