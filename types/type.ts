@@ -13,14 +13,14 @@ type Square = {
     highlight?: boolean;
 };
 
-type Board = Array<Square>;
+type Board = Square[];
 
 type Score = {
     Winner: Player | null;
     NumberOfMoves: number;
 };
 
-type Scores = Array<Score>;
+type Scores = Score[];
 
 type Game = {
     board: Board;
@@ -31,8 +31,8 @@ type Game = {
     isOver: boolean;
     botPlayer: Player;
     botBoard: Board;
-    botMoves: Array<Square>;
+    botMoves: Square[];
     botLastMove: Square | null;
-}
+};
 
 export type { Player, Square, Board, Game };
